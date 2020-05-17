@@ -48,7 +48,13 @@ router.post('/register', async (req, res, next) => {
         if (errors.length == 0) {
             const fullName = `${firstName} ${lastName}`;
             const hashId = enc.encrypt(password);
-            const role = roles.BASIC;
+            const num = await User.countDocuments();
+            let role;
+            if (num == 0) {
+                role = roles.SUPER;
+            } else {
+                role = roles.BASIC;
+            }
             const user = new User({ 
                 firstName,
                 lastName,
@@ -67,7 +73,7 @@ router.post('/register', async (req, res, next) => {
                     res.json(user);
                 }).catch(err => {
                     if (err.code == 11000) {
-                        const errors = [{ general: 'Email already used' }];
+                        const errors = [{ general: 'Email already in use' }];
                         res.json({ errors });
                     }
                 })

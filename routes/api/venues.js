@@ -35,7 +35,7 @@ router.route('/')
         next(e);
     }
 })
-.post(access.superAdmin, async (req, res, next) => {
+.post(access.verifyToken, async (req, res, next) => {
     try {
         const { name, address, city, country, leader, isSatellite, isCellGroup } = req.body;
         const user = req.user;
@@ -98,7 +98,7 @@ router.route('/satellites')
         next(e);
     }
 })
-.post(access.superAdmin, async (req, res, next) => {
+.post(access.verifyToken, async (req, res, next) => {
     try {
         const { name, address, city, country, leader } = req.body;
         const user = req.user;
@@ -161,7 +161,7 @@ router.route('/cellgroups')
         next(e);
     }
 })
-.post(access.superAdmin, async (req, res, next) => {
+.post(access.verifyToken, async (req, res, next) => {
     try {
         const { name, address, city, country, leader } = req.body;
         const user = req.user;
@@ -207,7 +207,7 @@ router.route('/:id')
         next(e);
     }
 })
-.put(access.superAdmin, async (req, res, next) => {
+.put(access.verifyToken, async (req, res, next) => {
     try {
         const user = req.user;
         const satelliteBefore = await Venue.findOne({ _id: req.params.id });
@@ -232,7 +232,7 @@ router.route('/:id')
         next(e);
     }
 })
-.delete(access.superAdmin, async (req, res, next) => {
+.delete(access.verifyToken, async (req, res, next) => {
     try {
         const user = req.user;
         const satellite = await Venue.findOne({ _id: req.params.id });

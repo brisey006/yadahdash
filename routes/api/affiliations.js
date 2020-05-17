@@ -34,7 +34,7 @@ router.route('/')
         next(e);
     }
 })
-.post(access.superAdmin, async (req, res, next) => {
+.post(access.verifyToken, async (req, res, next) => {
     try {
         const { name, acronym } = req.body;
         const user = req.user;
@@ -71,7 +71,7 @@ router.route('/:id')
         next(e);
     }
 })
-.put(access.superAdmin, async (req, res, next) => {
+.put(access.verifyToken, async (req, res, next) => {
     try {
         const user = req.user;
         const affiliationBefore = await Affiliation.findOne({ _id: req.params.id });
@@ -96,7 +96,7 @@ router.route('/:id')
         next(e);
     }
 })
-.delete(access.superAdmin, async (req, res, next) => {
+.delete(access.verifyToken, async (req, res, next) => {
     try {
         const user = req.user;
         const affiliation = await Affiliation.findOne({ _id: req.params.id });

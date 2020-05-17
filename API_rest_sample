@@ -1,0 +1,7 @@
+GET http://localhost:5000 HTTP/1.1
+
+### Register user
+POST http://localhost:5000/register HTTP/1.1
+content-type: application/json
+
+{}

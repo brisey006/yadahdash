@@ -5,10 +5,10 @@ POST http://localhost:5000/register HTTP/1.1
 content-type: application/json
 
 {
-    "email": "percymudzinganyama@gmail.com",
+    "email": "percymudzinga@gmail.com",
     "password": "persla",
     "confirmation": "persla",
-    "firstName": "Perseverance",
+    "firstName": "Percy",
     "lastName": "Mudzinganyama"
 }
 
@@ -18,5 +18,5 @@ content-type: application/json
 
 {
     "email": "percymudzinga@gmail.com",
-    "password": "persla2006"
+    "password": "persla"
 }

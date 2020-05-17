@@ -113,7 +113,7 @@ router.route('/:id')
         next(e);
     }
 })
-.delete(access.superAdmin, async (req, res, next) => {
+.delete(access.verifyToken, async (req, res, next) => {
     try {
         const user = req.user;
         const member = await Member.findOne({ _id: req.params.id });

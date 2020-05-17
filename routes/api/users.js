@@ -13,65 +13,6 @@ const enc = require('../../config/enc');
 const slugify = require('../../functions/index').slugify;
 
 const User = require('../../models/user');
-/** Post Requests */
-
-router.post('/users', access.verifyToken, async (req, res) => {
-    const { firstName, lastName, email, userType } = req.body;
-    const createdBy = req.user._id;
-    const errors = [];
-
-    if (!firstName) {
-        errors.push({ firstName: 'Please provide user\'s first name.' });
-    }
-
-    if (!lastName) {
-        errors.push({ lastName: 'Please provide user\'s last name.' });
-    }
-
-    if (!email) {
-        errors.push({ email: 'Please provide user email address.' });
-    } else {
-        if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))){
-            errors.push({ email: 'Please provide a valid email address.' });
-        }
-    }
-
-    if (!userType) {
-        errors.push({ userType: 'Please select user\'s type.' });
-    }
-
-    if (errors.length == 0) {
-        const fullName = `${firstName} ${lastName}`;
-        const password = randomString({ special: true, length: 8 });
-        const hashId = enc.encrypt(password);
-        const user = new User({ 
-            firstName, 
-            lastName, 
-            fullName, 
-            email,
-            userType, 
-            password, 
-            hashId, 
-            createdBy,
-        });
-    
-        bcrypt.genSalt(10, (err, salt) => bcrypt.hash(user.password, salt, (err, hash) => {
-            if (err) throw err;
-            user.password = hash;
-            
-            user.save().then(() => {
-                res.json(user);
-            }).catch(err => {
-                if (err.code == 11000) {
-                    const errors = [{ general: 'Email already used' }];
-                    res.json({ errors });
-                }
-            })
-        }));
-    } else {
-        res.json({ errors });
-    }
-});
 
 router.get('/user', access.verifyToken, (req, res) => {
     res.json(req.user);
@@ -81,7 +22,7 @@ router.delete('/logout', access.verifyToken, (req, res) => {
     res.json(req.user);
 });
 
-router.get('/users', access.superAdmin, async (req, res) => {
+router.get('/users', access.verifyToken, async (req, res) => {
     const page = req.query.page != undefined ? req.query.page : 1;
     const limit = req.query.limit != undefined ? req.query.limit : 10;
     const query = req.query.query != undefined ? req.query.query : '';

@@ -5,7 +5,7 @@ const access = require('../../config/auth');
 const Action = require('../../models/action');
 
 router.route('/')
-.get(access.superAdmin,async (req, res, next) => {
+.get(access.verifyToken,async (req, res, next) => {
     try {
         const page = req.query.page != undefined ? req.query.page : 1;
         const limit = req.query.limit != undefined ? req.query.limit : 10;

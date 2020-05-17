@@ -6,44 +6,7 @@ const roles = {
   ADMIN: 'administrator',
   BASIC: 'basic'
 }
-
-const ensureAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    res.sendStatus(403);
-  }
-}
-
-function verifyToken(req, res, next) {
-  const bearerHeader = req.headers['authorization'];
-  if(typeof bearerHeader !== 'undefined') {
-    let bearerToken;
-    if (bearerHeader.indexOf(' ') > -1) {
-      const bearer = bearerHeader.split(' ');
-      bearerToken = bearer[1];
-    } else {
-      bearerToken = bearerHeader;
-    }
-    
-    jwt.verify(bearerToken, process.env.JWT_KEY, (err, authData) => {
-      if(err) {
-        res.sendStatus(403);
-      } else {
-        req.user = {
-          token: bearerToken,
-          ...authData
-        };
-        next();
-      }
-    });
-  } else {
-    res.sendStatus(403);
-  }
-
-}
-
-function superAdmin(req, res, next) {
+const verifyToken = (req, res, next) => {
   const bearerHeader = req.headers['authorization'];
   const error = new Error('Forbidden');
   error.status = 403;
@@ -87,8 +50,6 @@ function superAdmin(req, res, next) {
 }
 
 module.exports = {
-  ensureAuthenticated,
   verifyToken,
-  superAdmin,
   roles
 }
