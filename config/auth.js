@@ -25,19 +25,8 @@ const verifyToken = (req, res, next) => {
         next(err);
       } else {
         try {
-          const user = await User.findOne({ _id: authData.id }).select('-password');
-          if (user) {
-            if (user.userType == 'Super User') {
-              req.user = user;
-              next();
-            } else {
-              next(error);
-            }
-          } else {
-            const error = new Error('Invalid token');
-            error.status = 403;
-            next(error);
-          }
+          req.user = authData;
+          next();
         } catch(e) {
           next(e);
         }

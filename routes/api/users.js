@@ -3,26 +3,34 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const jwt = require("jsonwebtoken");
 const router = express.Router();
-const NodeRSA = require('node-rsa');
 const fs = require('fs');
-const randomString = require('random-string');
 const sharp = require('sharp');
 
-const access = require('../../config/auth');
-const enc = require('../../config/enc');
 const slugify = require('../../functions/index').slugify;
+const roles = require('../../config/auth').roles;
 
 const User = require('../../models/user');
 
-router.get('/user', access.verifyToken, (req, res) => {
+const verifyToken = require('../../config/auth').verifyToken;
+const superUser = require('../../config/permissions').superUser;
+
+router.get('/routes', (req, res) => {
+    const routes = router.stack
+    .filter(r => r.route)
+    .map(r => {
+      return {
+        method: Object.keys(r.route.methods)[0].toUpperCase(),
+        path: req.baseUrl + r.route.path
+      };
+    });
+    res.json(routes);
+});
+
+router.delete('/logout', verifyToken, (req, res) => {
     res.json(req.user);
 });
 
-router.delete('/logout', access.verifyToken, (req, res) => {
-    res.json(req.user);
-});
-
-router.get('/users', access.verifyToken, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
     const page = req.query.page != undefined ? req.query.page : 1;
     const limit = req.query.limit != undefined ? req.query.limit : 10;
     const query = req.query.query != undefined ? req.query.query : '';
@@ -45,7 +53,7 @@ router.get('/users', access.verifyToken, async (req, res) => {
     res.json(users);
 });
 
-router.get('/users/:id', access.verifyToken, async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
     if (req.params.id != undefined) {
         let user = await User.findOne({ _id: req.params.id }).select('-password');
         res.json(user);
@@ -56,13 +64,32 @@ router.get('/users/:id', access.verifyToken, async (req, res) => {
     }
 });
 
-router.put('/users/:id', access.verifyToken, async (req, res) => {
+router.put('/:id/change-role', verifyToken, superUser, async (req, res, next) => {
+    try {
+        const role = req.body.role;
+        if (Object.values(roles).indexOf(role) > -1) {
+            const updating = await User.updateOne({ _id: req.params.id }, { $set: { role } });
+            const user = await User.findOne({ _id: req.params.id }).select('-password');
+            if (updating.nModified == 1) {
+                res.json(user);
+            }
+        } else {
+            const error = new Error('Role not available');
+            error.status = 406;
+            next(error);
+        }
+    } catch (e) {
+        next(e);
+    }
+});
+
+router.put('/:id', verifyToken, async (req, res) => {
     let data = req.body;
     let result = await User.updateOne({ _id: req.params.id }, { $set: data });
     res.json(result);
 });
 
-router.put('/users/:id/change-name', access.verifyToken, async (req, res) => {
+router.put('/:id/change-name', verifyToken, async (req, res) => {
     const { firstName, lastName } = req.body;
     const errors = [];
     
@@ -84,7 +111,7 @@ router.put('/users/:id/change-name', access.verifyToken, async (req, res) => {
     }
 });
 
-router.put('/users/settings/change-password', access.verifyToken, async (req, res) => {
+router.put('/settings/change-password', verifyToken, async (req, res) => {
     const { currentPassword, password, confirmation } = req.body;
     const user = req.user;
     const errors = [];
@@ -132,7 +159,7 @@ router.put('/users/settings/change-password', access.verifyToken, async (req, re
     });
 });
 
-router.delete('/users/:id', access.verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
     let user = await User.deleteOne({ _id: req.params.id });
     res.json({
         status: 'deleted',
@@ -140,12 +167,12 @@ router.delete('/users/:id', access.verifyToken, async (req, res) => {
     });
 });
 
-router.get('/users/:id/image', async (req, res) => {
+router.get('/:id/image', async (req, res) => {
     const image = await User.findOne({ _id: req.params.id }).select(['image']);
     res.json(image);
 });
 
-router.post('/users/:id/image', access.verifyToken, async (req, res) => {
+router.post('/:id/image', verifyToken, async (req, res) => {
   
   if (Object.keys(req.files).length == 0) {
     return res.status(400).send('No files were uploaded.');
@@ -177,7 +204,7 @@ router.post('/users/:id/image', access.verifyToken, async (req, res) => {
   });
 });
 
-router.post('/users/:id/image/crop', async (req, res) => {
+router.post('/:id/image/crop', async (req, res) => {
     sharp.cache(false);
     const { width, height, x, y, scaleX, scaleY } = req.body;
     const user = await User.findOne({ _id: req.params.id });
@@ -215,7 +242,7 @@ router.post('/users/:id/image/crop', async (req, res) => {
             });
 });
 
-router.post('/users/crop-picture/:id', access.verifyToken, async (req, res) => {
+router.post('/crop-picture/:id', verifyToken, async (req, res) => {
   
   if (Object.keys(req.files).length == 0) {
     return res.status(400).send('No files were uploaded.');

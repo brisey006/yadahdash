@@ -4,11 +4,10 @@ const mongoosePaginate = require('mongoose-paginate-v2');
 const AffiliationSchema = new mongoose.Schema({
     name: {
         type: String,
-        index: true,
+        unique: true
     },
     acronym: {
-        type: String,
-        index: true
+        type: String
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {

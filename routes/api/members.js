@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const access = require('../../config/auth');
 const enc = require('../../config/enc');
 const slugify = require('../../functions/index').slugify;
 
 const Member = require('../../models/member');
 const Action = require('../../models/action');
+
+const verifyToken = require('../../config/auth').verifyToken;
+const { superUser, administrator, basicUser } = require('../../config/permissions');
 
 router.route('/')
 .get(async (req, res, next) => {
@@ -34,39 +36,29 @@ router.route('/')
         next(e);
     }
 })
-.post(async (req, res, next) => {
+.post(verifyToken, basicUser,async (req, res, next) => {
     try {
         const { 
-            firstName, lastName, bio, address, phoneNumber, gender, skill,
-            dateOfBirth, country, partner, cellGroup, satellite, affiliation, idNumber
+            partner,
+            cellGroup,
+            satellite,
+            affiliation
         } = req.body;
+        const user = req.user._id;
         
         const errors = [];
-
-        if (!firstName) {
-            errors.push('firstName');
-        }
-        if (!lastName) {
-            errors.push('lastName');
-        }
-
-        if (!phoneNumber) {
-            errors.push('phoneNumber');
-        }
-
-        if (!gender) {
-            errors.push('gender');
-        }
 
         if (!affiliation) {
             errors.push('affiliation');
         }
 
         if (errors.length == 0) {
-            const fullName = `${firstName} ${lastName}`;
-            const member = new Member({ 
-                firstName, lastName, fullName, bio, address, phoneNumber, gender, skill,
-                dateOfBirth, country, partner, cellGroup, satellite, affiliation, idNumber 
+            const member = new Member({
+                user,
+                partner,
+                cellGroup,
+                satellite,
+                affiliation
             });
             const result = await member.save();
             res.status(201).json(result);
@@ -113,7 +105,7 @@ router.route('/:id')
         next(e);
     }
 })
-.delete(access.verifyToken, async (req, res, next) => {
+.delete(verifyToken, async (req, res, next) => {
     try {
         const user = req.user;
         const member = await Member.findOne({ _id: req.params.id });

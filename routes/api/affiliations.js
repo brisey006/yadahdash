@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const access = require('../../config/auth');
 const enc = require('../../config/enc');
 const slugify = require('../../functions/index').slugify;
+const verifyToken = require('../../config/auth').verifyToken;
 
 const Affiliation = require('../../models/affiliation');
 const Action = require('../../models/action');
+
+const { superUser, administrator, basicUser } = require('../../config/permissions');
 
 router.route('/')
 .get(async (req, res, next) => {
@@ -34,7 +36,7 @@ router.route('/')
         next(e);
     }
 })
-.post(access.verifyToken, async (req, res, next) => {
+.post(verifyToken, administrator, async (req, res, next) => {
     try {
         const { name, acronym } = req.body;
         const user = req.user;
@@ -47,7 +49,7 @@ router.route('/')
         }
 
         if (errors.length == 0) {
-            const affiliation = new Affiliation({ name, acronym, createdBy: user._id });
+            const affiliation = new Affiliation({ name, acronym, createdBy: user.id });
             const action = new Action({ user: user._id, action: 'CREATE', model: 'Affiliation', data: JSON.stringify(affiliation) });
             const result = await affiliation.save();
             await action.save();
@@ -71,7 +73,7 @@ router.route('/:id')
         next(e);
     }
 })
-.put(access.verifyToken, async (req, res, next) => {
+.put(verifyToken, administrator, async (req, res, next) => {
     try {
         const user = req.user;
         const affiliationBefore = await Affiliation.findOne({ _id: req.params.id });
@@ -96,7 +98,7 @@ router.route('/:id')
         next(e);
     }
 })
-.delete(access.verifyToken, async (req, res, next) => {
+.delete(verifyToken, administrator, async (req, res, next) => {
     try {
         const user = req.user;
         const affiliation = await Affiliation.findOne({ _id: req.params.id });

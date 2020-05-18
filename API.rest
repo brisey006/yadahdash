@@ -1,19 +1,101 @@
-GET http://localhost:5000 HTTP/1.1
+@hostname = localhost
+@port = 5000
+@host = {{hostname}}:{{port}}
+
+###
+GET http://{{host}} HTTP/1.1
+
+### Routes
+GET http://{{host}}/api/users/routes HTTP/1.1
 
 ### Register user
-POST http://localhost:5000/register HTTP/1.1
+POST http://{{host}}/register HTTP/1.1
+content-type: application/json
+
+{
+    "email": "bridgetn.mhlanga@gmail.com",
+    "password": "brisey",
+    "confirmation": "brisey",
+    "firstName": "Nyaradzo",
+    "lastName": "Mhlanga"
+}
+
+### Login Route - Super Admin
+POST http://{{host}}/login HTTP/1.1
 content-type: application/json
 
 {
     "email": "percymudzinga@gmail.com",
-    "password": "persla",
-    "confirmation": "persla",
-    "firstName": "Percy",
-    "lastName": "Mudzinganyama"
+    "password": "persla"
 }
 
-### Login Route
-POST http://localhost:5000/login HTTP/1.1
+### Login Route - Administrator
+POST http://{{host}}/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "persymudzinganyama@gmail.com",
+    "password": "persla"
+}
+
+### Login Route - Basic User
+POST http://{{host}}/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "bridgetn.mhlanga@gmail.com",
+    "password": "brisey"
+}
+
+### Users
+GET http://{{host}}/api/users HTTP/1.1
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYzE0YzlkOTM0MWQzMDk1YzFiYmY1YyIsInJvbGUiOiJzdXBlci11c2VyIiwiaWF0IjoxNTg5Nzk0NzI0fQ.XMbAK3kDrNpGODPqeEcuXdIDRYe41pXvLXbNOAqAGYI
+
+### Get user by ID
+GET http://{{host}}/api/users/5ec1c080d4242931f435b06a HTTP/1.1
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYzE0YzlkOTM0MWQzMDk1YzFiYmY1YyIsImlhdCI6MTU4OTc1NTc5OH0.Ps2BoLl0Ze_VxdD-OAriCl1zGKp3pQHG_MpQCMPP92E
+
+### Change user role
+PUT http://{{host}}/api/users/5ec1c080d4242931f435b06a/change-role HTTP/1.1
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYzE0YzlkOTM0MWQzMDk1YzFiYmY1YyIsImlhdCI6MTU4OTc1ODI2Nn0.T2378C9P8AovG8iYxcDjHu6cU1ARattkN8rAXdPYH_g
+
+{
+    "role": "basic"
+}
+### Affiliations
+GET http://{{host}}/api/affiliations HTTP/1.1
+
+### Add Affiliation 1
+POST http://{{host}}/api/affiliations HTTP/1.1
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYzE0YzlkOTM0MWQzMDk1YzFiYmY1YyIsImlhdCI6MTU4OTc1NTc5OH0.Ps2BoLl0Ze_VxdD-OAriCl1zGKp3pQHG_MpQCMPP92E
+
+{
+    "name": "Youth Of Innovation",
+    "acronym": "YOI"
+}
+
+### Add Affiliation 2
+POST http://{{host}}/api/affiliations HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Man With Power",
+    "acronym": "MWP"
+}
+
+### Add Affiliation 3
+POST http://{{host}}/api/affiliations HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Women Of Valour",
+    "acronym": "WOV"
+}
+
+### New Member
+POST http://{{host}}/api/members HTTP/1.1
 content-type: application/json
 
 {
